@@ -8,18 +8,41 @@ import { genres } from '../assets/constants';
 import { useGetTopChartsQuery } from '../redux/services/shazamCore';
 
 const Discover = () => {
-
-const dispatch = useDispatch();
-
-const { activeSong, isPlaying } = useSelector((state) => state.player);
+  const dispatch = useDispatch();
+  const { activeSong, isPlaying } = useSelector((state) => state.player);
   const { data, isFetching, error } = useGetTopChartsQuery();
   const genreTitle = 'Pop';
 
   if (isFetching) return <Loader title="Loading songs..." />;
-  
   if (error) return <Error />;
 
-  const songs = data?.items || []; // ✅ Correct array extraction
+  //  Normalize data to match SongCard structure
+  const songs = (data?.tracks || data?.items || []).map((song, i) => ({
+    id: song.key || song.id?.videoId || song.id || i,
+    snippet: {
+      title: song.title || song.snippet?.title || 'Unknown Title',
+      channelTitle:
+        song.subtitle || song.snippet?.channelTitle || 'Unknown Artist',
+      channelId: song?.artists?.[0]?.adamid || song.snippet?.channelId || '#',
+      thumbnails: {
+        high: {
+          url:
+            song.images?.coverart
+            || song.images?.background
+            || 'https://via.placeholder.com/150',
+        },
+        medium: {
+          url:
+            song.images?.background
+            || song.images?.coverart
+            || 'https://via.placeholder.com/150',
+        },
+        default: {
+          url: song.images?.coverart || 'https://via.placeholder.com/150',
+        },
+      },
+    },
+  }));
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
@@ -32,8 +55,7 @@ const { activeSong, isPlaying } = useSelector((state) => state.player);
       <select
         onChange={() => {}}
         value=""
-        className="bg-black text-gray-300 p-3 text-sm rounded-lg outline-none"
-      >
+        className="bg-black text-gray-300 p-3 text-sm rounded-lg outline-none">
         {genres.map((genre) => (
           <option key={genre.value} value={genre.value}>
             {genre.title}
@@ -45,11 +67,11 @@ const { activeSong, isPlaying } = useSelector((state) => state.player);
       <div className="flex flex-wrap sm:justify-start justify-center gap-8 mt-6">
         {songs.map((song, i) => (
           <SongCard
-            key={song.id} // ✅ Use a unique id from YouTube data
+            key={song.id || i}
             song={song}
             isPlaying={isPlaying}
             activeSong={activeSong}
-            data={data}
+            data={songs} // normalized array
             i={i}
           />
         ))}

@@ -3,7 +3,6 @@
 /* eslint-disable quotes */
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-
 import PlayPause from "./PlayPause";
 import { playPause, setActiveSong } from "../redux/features/playerSlice";
 
@@ -11,21 +10,19 @@ const SongCard = ({ song, i, activeSong, isPlaying, data }) => {
   const dispatch = useDispatch();
 
   const handlePlayClick = () => {
-    // 🔹 Normalize the song object so Redux always has a consistent structure
     const normalizedSong = {
-      title: song.snippet.title,
-      artist: song.snippet.channelTitle,
+      title: song.snippet?.title || "Unknown Title",
+      artist: song.snippet?.channelTitle || "Unknown Artist",
       images: {
         coverart:
-          song.snippet.thumbnails?.high?.url ||
-          song.snippet.thumbnails?.medium?.url ||
-          song.snippet.thumbnails?.default?.url ||
+          song.snippet?.thumbnails?.high?.url ||
+          song.snippet?.thumbnails?.medium?.url ||
+          song.snippet?.thumbnails?.default?.url ||
           "https://via.placeholder.com/150",
       },
-      id: song.id?.videoId || song.id, // works for YouTube ID
+      id: song.id || i,
     };
 
-    // 🔹 Dispatch the normalized song
     dispatch(setActiveSong({ song: normalizedSong, i, data }));
     dispatch(playPause(true));
   };
@@ -34,11 +31,10 @@ const SongCard = ({ song, i, activeSong, isPlaying, data }) => {
     dispatch(playPause(false));
   };
 
-  // 🔹 Use normalized imageUrl for display
   const imageUrl =
-    song.snippet.thumbnails?.high?.url ||
-    song.snippet.thumbnails?.medium?.url ||
-    song.snippet.thumbnails?.default?.url ||
+    song.snippet?.thumbnails?.high?.url ||
+    song.snippet?.thumbnails?.medium?.url ||
+    song.snippet?.thumbnails?.default?.url ||
     "https://via.placeholder.com/150";
 
   return (
@@ -46,14 +42,13 @@ const SongCard = ({ song, i, activeSong, isPlaying, data }) => {
       <div className="relative w-full h-56 group">
         <img
           src={imageUrl}
-          alt={song.snippet.title}
+          alt={song.snippet?.title || "Song"}
           className="w-full h-full rounded-lg object-cover"
+          onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }}
         />
         <div
-          className={`absolute inset-0 justify-center items-center bg-black bg-opacity-50 group-hover:flex ${
-            activeSong?.id === (song.id?.videoId || song.id)
-              ? "flex bg-black bg-opacity-70"
-              : "hidden"
+          className={`absolute inset-0 justify-center items-center bg-black bg-opacity-50 group-hover:flex transition-all duration-300 ${
+            activeSong?.id === song.id ? "flex bg-black bg-opacity-70" : "hidden"
           }`}
         >
           <PlayPause
@@ -67,15 +62,15 @@ const SongCard = ({ song, i, activeSong, isPlaying, data }) => {
       </div>
 
       <div className="mt-4 flex flex-col">
-        <Link to={`/songs/${song.id?.videoId || song.id}`}>
-          <p className="text-lg font-semibold text-white truncate">
-            {song.snippet.title}
+        <Link to={`/songs/${song.id}`}>
+          <p className="text-lg font-semibold text-white truncate hover:text-cyan-400">
+            {song.snippet?.title || "Unknown Song"}
           </p>
         </Link>
 
-        <Link to={`/artists/${song.snippet.channelId}`}>
-          <p className="text-sm text-gray-300 mt-1 truncate">
-            {song.snippet.channelTitle}
+        <Link to={`/artists/${song.snippet?.channelId || "#"}`}>
+          <p className="text-sm text-gray-300 mt-1 truncate hover:text-cyan-300">
+            {song.snippet?.channelTitle || "Unknown Artist"}
           </p>
         </Link>
       </div>
@@ -84,4 +79,3 @@ const SongCard = ({ song, i, activeSong, isPlaying, data }) => {
 };
 
 export default SongCard;
-
