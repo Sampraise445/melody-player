@@ -8,10 +8,17 @@ import { genres } from '../assets/constants';
 import { useGetTopChartsQuery } from '../redux/services/shazamCore';
 
 const Discover = () => {
+ 
   const dispatch = useDispatch();
   const { activeSong, isPlaying } = useSelector((state) => state.player);
+
+
+const { activeSong, isPlaying } = useSelector((state) => state.player);
+ 
   const { data, isFetching, error } = useGetTopChartsQuery();
   const genreTitle = 'Pop';
+  console.log('data:', data);
+  console.log('error:', error);
 
   if (isFetching) return <Loader title="Loading songs..." />;
   if (error) return <Error />;
