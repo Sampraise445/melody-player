@@ -19,7 +19,7 @@ export const youtubeLiteApi = createApi({
     // ✅ Correct endpoint syntax for "Most Popular" videos
     getTopCharts: builder.query({
       query: (region = 'US') =>
-        `videos?chart=mostPopular&regionCode=${region}&part=id,snippet&maxResults=20`,
+       `search?part=snippet&q=test&type=video&maxResults=30`,
     }),
   }),
 });
